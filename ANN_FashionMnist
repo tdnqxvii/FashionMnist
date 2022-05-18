@@ -1,0 +1,61 @@
+# Import Libary
+from tensorflow.keras.datasets import fashion_mnist 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from tensorflow.keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout
+from tensorflow.keras.optimizers import RMSprop
+
+#Load Data
+(x_train,y_train),(x_test,y_test) = fashion_mnist.load_data()
+X = x_test
+
+# Create classes of data
+classes = ['T-shirt','Trouser','Pullover','Dress','Coat','Sandal','Shirt','Sneaker','Bag','Ankle Boot']
+
+# Show data
+for i in range(9):
+  plt.subplot(330 +i+1)
+  plt.imshow(x_train[i])
+plt.show()
+
+# Convert to vector
+x_train = x_train.reshape(60000,784) 
+x_test = x_test.reshape(10000,784)
+
+# Convert to float
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+
+#Convert from 0-255 to 0-1
+x_train/= 255.0
+x_test/= 255.0
+
+# One hot encoding
+y_train = to_categorical(y_train,10) 
+y_test = to_categorical(y_test,10)
+
+# Create Model ANN
+    # 2 Layer
+model = Sequential()
+model.add(Dense(128, activation ='relu', input_shape = (784,)))
+model.add(Dropout(0.2))
+model.add(Dense(128, activation = 'relu'))
+model.add(Dropout(0.1))
+model.add(Dense(10, activation = 'softmax')) 
+model.add(Dropout(0.1))
+
+model.summary()
+model.compile( loss='categorical_crossentropy', optimizer = RMSprop(), metrics = ['accuracy']) 
+history = model.fit(x_train, y_train, batch_size = 128, epochs = 10, verbose = 1, validation_data = (x_test, y_test))
+
+# Accuarcy of Model
+score = model.evaluate(x_test,y_test,verbose = 1)
+
+# Predict and Test
+y_pred = model.predict(x_test)
+plt.imshow(X[7])
+fs = np.argmax(y_pred[7])
+classes[fs]
